@@ -1,0 +1,16 @@
+{"time":"2024-11-01T23:15:40.773088059+06:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-11-01T23:15:40.773108547+06:00","level":"INFO","msg":"created symlink","path":"/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241101_231540-ifzn5xzs/logs/debug-core.log"}
+{"time":"2024-11-01T23:15:40.881437683+06:00","level":"INFO","msg":"created new stream","id":"ifzn5xzs"}
+{"time":"2024-11-01T23:15:40.881677185+06:00","level":"INFO","msg":"stream: started","id":"ifzn5xzs"}
+{"time":"2024-11-01T23:15:40.881766497+06:00","level":"INFO","msg":"sender: started","stream_id":"ifzn5xzs"}
+{"time":"2024-11-01T23:15:40.881750185+06:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"ifzn5xzs"}}
+{"time":"2024-11-01T23:15:40.88177355+06:00","level":"INFO","msg":"handler: started","stream_id":{"value":"ifzn5xzs"}}
+{"time":"2024-11-01T23:15:41.46761285+06:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-11-01T23:15:42.429420523+06:00","level":"INFO","msg":"stream: closing","id":"ifzn5xzs"}
+{"time":"2024-11-01T23:15:42.429476518+06:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-11-01T23:15:42.430365922+06:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-11-01T23:15:44.524787707+06:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-11-01T23:15:45.100833821+06:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"ifzn5xzs"}}
+{"time":"2024-11-01T23:15:45.10100568+06:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"ifzn5xzs"}}
+{"time":"2024-11-01T23:15:45.101027945+06:00","level":"INFO","msg":"sender: closed","stream_id":"ifzn5xzs"}
+{"time":"2024-11-01T23:15:45.101274738+06:00","level":"INFO","msg":"stream: closed","id":"ifzn5xzs"}

@@ -1,0 +1,21 @@
+Set warmup steps = 8750
+Traceback (most recent call last):
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 522, in <module>
+    main(args)
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 515, in main
+    train_with_pruning(model,dataset_train, dataset_val,device,args)
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 298, in train_with_pruning
+    lr_schedule_values = utils.cosine_scheduler(
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/utils.py", line 458, in cosine_scheduler
+    assert len(schedule) == epochs * niter_per_ep
+AssertionError
+Traceback (most recent call last):
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 522, in <module>
+    main(args)
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 515, in main
+    train_with_pruning(model,dataset_train, dataset_val,device,args)
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 298, in train_with_pruning
+    lr_schedule_values = utils.cosine_scheduler(
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/utils.py", line 458, in cosine_scheduler
+    assert len(schedule) == epochs * niter_per_ep
+AssertionError

@@ -54,7 +54,7 @@ def get_args_parser():
     parser = argparse.ArgumentParser('ConvNeXt training and evaluation script for image classification', add_help=False)
     parser.add_argument('--batch_size', default=256, type=int,
                         help='Per GPU batch size')
-    parser.add_argument('--epochs', default=50, type=int)
+    parser.add_argument('--epochs', default=1, type=int)
     parser.add_argument('--update_freq', default=1, type=int,
                         help='gradient accumulation steps')
 
@@ -233,7 +233,7 @@ import torch
 def accuracy(outputs, targets, topk=(1,)):
     """Computes the accuracy over the top k predictions for the specified values of k"""
     maxk = max(topk)
-    batch_size = targets.size(0)
+    # batch_size = targets.size(0)
 
     _, pred = outputs.topk(maxk, 1, True, True)
     pred = pred.t()
@@ -242,7 +242,7 @@ def accuracy(outputs, targets, topk=(1,)):
     res = []
     for k in topk:
         correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
-        res.append(correct_k.mul_(100.0 / batch_size))
+        # res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
 
@@ -331,16 +331,14 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
     criterion = torch.nn.CrossEntropyLoss()
     # current_sparsity = args.sparsity
     # print("Current Sparcity", current_sparsity)
-    actual_sparsity=check_sparsity(model)
+    actual_sparsity = check_sparsity(model)
     while actual_sparsity > 0:
         print(f"\nCurrent sparsity level: {actual_sparsity}")
         
         # Pruning step
         np.random.seed(0)
         calibration_ids = np.random.choice(len(dataset_train), args.nsamples)
-        calib_data = []
-        for i in calibration_ids:
-            calib_data.append(dataset_train[i][0].unsqueeze(dim=0))
+        calib_data = [dataset_train[i][0].unsqueeze(dim=0) for i in calibration_ids]
         calib_data = torch.cat(calib_data, dim=0).to(device)
 
         with torch.no_grad():
@@ -350,36 +348,57 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
         actual_sparsity = check_sparsity(model)
         print(f"Actual sparsity after pruning: {actual_sparsity}")
 
-        # Training loop for current sparsity level
-        best_acc = 0.0
+        # Training loop for the current sparsity level
         for epoch in range(args.epochs):
             # Train for one epoch
             train_stats = train_one_epoch(
-                        model, criterion, train_loader, optimizer,
-                        device, epoch, loss_scaler, args.clip_grad, model_ema, mixup_fn,
-                        log_writer=log_writer, wandb_logger=wandb_logger, start_steps=epoch * num_training_steps_per_epoch,
-                        lr_schedule_values=lr_schedule_values, wd_schedule_values=wd_schedule_values, schedules=schedules,
-                        num_training_steps_per_epoch=num_training_steps_per_epoch, update_freq=args.update_freq,
-                        use_amp=args.use_amp
-                    )
+                model, criterion, train_loader, optimizer,
+                device, epoch, loss_scaler, args.clip_grad, model_ema, mixup_fn,
+                log_writer=log_writer, wandb_logger=wandb_logger, start_steps=epoch * num_training_steps_per_epoch,
+                lr_schedule_values=lr_schedule_values, wd_schedule_values=wd_schedule_values, schedules=schedules,
+                num_training_steps_per_epoch=num_training_steps_per_epoch, update_freq=args.update_freq,
+                use_amp=args.use_amp
+            )
+            # Convert training outputs and targets to indices
+            def convert_to_indices(labels, label_to_index):
+                return [label_to_index[label] for label in labels]
+
+            # Evaluate on training set
+            train_outputs, train_targets, _ = evaluate(train_loader, model, device, use_amp=args.use_amp)
+
+            # Create label_to_index mapping for the current epoch
+            label_to_index = {label: idx for idx, label in enumerate(set(train_targets + train_outputs))}
+
+            # Convert training outputs and targets to indices
+            train_outputs_indices = convert_to_indices(train_outputs, label_to_index)
+            train_targets_indices = convert_to_indices(train_targets, label_to_index)
+
+            # Calculate training accuracy and error
+            train_correct = sum([1 for output, target in zip(train_outputs_indices, train_targets_indices) if output == target])
+            train_total = len(train_targets_indices)
+            train_accuracy = train_correct / train_total * 100
+            train_error = 100 - train_accuracy
 
             # Evaluate on validation set
-            test_stats = evaluate(val_loader, model, device, use_amp=args.use_amp)
-            
-            
-                # Measure accuracy
-            metric_logger = utils.MetricLogger(delimiter="  ")
-            acc1, acc5 = accuracy(outputs, targets, topk=(1, 5))
-            batch_size = args.batch_size
-            metric_logger.update(loss=loss.item())
-            metric_logger.update(lr=optimizer.param_groups[0]["lr"])
-            metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
-            metric_logger.meters['acc5'].update(acc5.item(), n=batch_size)
-            print(f"Epoch {epoch}")
-            print(f"Training error: {100 - train_stats['acc1']:.2f}%")
-            print(f"Testing error: {100 - test_stats['acc1']:.2f}%")
-        current_sparsity = max(0, current_sparsity - args.sparsity_step)
-        args.sparsity = current_sparsity
+            test_outputs, test_targets, _ = evaluate(val_loader, model, device, use_amp=args.use_amp)
+
+            # Update label_to_index to include any new labels in test set
+            label_to_index.update({label: idx for idx, label in enumerate(set(test_targets + test_outputs), start=len(label_to_index))})
+
+            # Convert testing outputs and targets to indices
+            test_outputs_indices = convert_to_indices(test_outputs, label_to_index)
+            test_targets_indices = convert_to_indices(test_targets, label_to_index)
+
+            # Calculate testing accuracy and error
+            test_correct = sum([1 for output, target in zip(test_outputs_indices, test_targets_indices) if output == target])
+            test_total = len(test_targets_indices)
+            test_accuracy = test_correct / test_total * 100
+            test_error = 100 - test_accuracy
+
+            print(f"Epoch {epoch}: Training Error = {train_error:.2f}%, Testing Error = {test_error:.2f}%")
+
+
+        actual_sparsity = check_sparsity(model)
 
 # def train_one_epoch(model, criterion, data_loader, optimizer, device, epoch, args):
 #     model.train()

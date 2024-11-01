@@ -1,0 +1,270 @@
+Set warmup steps = 8750
+Set warmup steps = 0
+Max WD = 0.0500000, Min WD = 0.0000040
+Param groups = {
+  "decay": {
+    "weight_decay": 0.05,
+    "params": [
+      "downsample_layers.0.0.weight",
+      "downsample_layers.1.1.weight",
+      "downsample_layers.2.1.weight",
+      "downsample_layers.3.1.weight",
+      "stages.0.0.dwconv.weight",
+      "stages.0.0.pwconv1.weight",
+      "stages.0.0.pwconv2.weight",
+      "stages.0.1.dwconv.weight",
+      "stages.0.1.pwconv1.weight",
+      "stages.0.1.pwconv2.weight",
+      "stages.0.2.dwconv.weight",
+      "stages.0.2.pwconv1.weight",
+      "stages.0.2.pwconv2.weight",
+      "stages.1.0.dwconv.weight",
+      "stages.1.0.pwconv1.weight",
+      "stages.1.0.pwconv2.weight",
+      "stages.1.1.dwconv.weight",
+      "stages.1.1.pwconv1.weight",
+      "stages.1.1.pwconv2.weight",
+      "stages.1.2.dwconv.weight",
+      "stages.1.2.pwconv1.weight",
+      "stages.1.2.pwconv2.weight",
+      "stages.2.0.dwconv.weight",
+      "stages.2.0.pwconv1.weight",
+      "stages.2.0.pwconv2.weight",
+      "stages.2.1.dwconv.weight",
+      "stages.2.1.pwconv1.weight",
+      "stages.2.1.pwconv2.weight",
+      "stages.2.2.dwconv.weight",
+      "stages.2.2.pwconv1.weight",
+      "stages.2.2.pwconv2.weight",
+      "stages.2.3.dwconv.weight",
+      "stages.2.3.pwconv1.weight",
+      "stages.2.3.pwconv2.weight",
+      "stages.2.4.dwconv.weight",
+      "stages.2.4.pwconv1.weight",
+      "stages.2.4.pwconv2.weight",
+      "stages.2.5.dwconv.weight",
+      "stages.2.5.pwconv1.weight",
+      "stages.2.5.pwconv2.weight",
+      "stages.2.6.dwconv.weight",
+      "stages.2.6.pwconv1.weight",
+      "stages.2.6.pwconv2.weight",
+      "stages.2.7.dwconv.weight",
+      "stages.2.7.pwconv1.weight",
+      "stages.2.7.pwconv2.weight",
+      "stages.2.8.dwconv.weight",
+      "stages.2.8.pwconv1.weight",
+      "stages.2.8.pwconv2.weight",
+      "stages.3.0.dwconv.weight",
+      "stages.3.0.pwconv1.weight",
+      "stages.3.0.pwconv2.weight",
+      "stages.3.1.dwconv.weight",
+      "stages.3.1.pwconv1.weight",
+      "stages.3.1.pwconv2.weight",
+      "stages.3.2.dwconv.weight",
+      "stages.3.2.pwconv1.weight",
+      "stages.3.2.pwconv2.weight",
+      "head.weight"
+    ],
+    "lr_scale": 1.0
+  },
+  "no_decay": {
+    "weight_decay": 0.0,
+    "params": [
+      "downsample_layers.0.0.bias",
+      "downsample_layers.0.1.weight",
+      "downsample_layers.0.1.bias",
+      "downsample_layers.1.0.weight",
+      "downsample_layers.1.0.bias",
+      "downsample_layers.1.1.bias",
+      "downsample_layers.2.0.weight",
+      "downsample_layers.2.0.bias",
+      "downsample_layers.2.1.bias",
+      "downsample_layers.3.0.weight",
+      "downsample_layers.3.0.bias",
+      "downsample_layers.3.1.bias",
+      "stages.0.0.gamma",
+      "stages.0.0.dwconv.bias",
+      "stages.0.0.norm.weight",
+      "stages.0.0.norm.bias",
+      "stages.0.0.pwconv1.bias",
+      "stages.0.0.pwconv2.bias",
+      "stages.0.1.gamma",
+      "stages.0.1.dwconv.bias",
+      "stages.0.1.norm.weight",
+      "stages.0.1.norm.bias",
+      "stages.0.1.pwconv1.bias",
+      "stages.0.1.pwconv2.bias",
+      "stages.0.2.gamma",
+      "stages.0.2.dwconv.bias",
+      "stages.0.2.norm.weight",
+      "stages.0.2.norm.bias",
+      "stages.0.2.pwconv1.bias",
+      "stages.0.2.pwconv2.bias",
+      "stages.1.0.gamma",
+      "stages.1.0.dwconv.bias",
+      "stages.1.0.norm.weight",
+      "stages.1.0.norm.bias",
+      "stages.1.0.pwconv1.bias",
+      "stages.1.0.pwconv2.bias",
+      "stages.1.1.gamma",
+      "stages.1.1.dwconv.bias",
+      "stages.1.1.norm.weight",
+      "stages.1.1.norm.bias",
+      "stages.1.1.pwconv1.bias",
+      "stages.1.1.pwconv2.bias",
+      "stages.1.2.gamma",
+      "stages.1.2.dwconv.bias",
+      "stages.1.2.norm.weight",
+      "stages.1.2.norm.bias",
+      "stages.1.2.pwconv1.bias",
+      "stages.1.2.pwconv2.bias",
+      "stages.2.0.gamma",
+      "stages.2.0.dwconv.bias",
+      "stages.2.0.norm.weight",
+      "stages.2.0.norm.bias",
+      "stages.2.0.pwconv1.bias",
+      "stages.2.0.pwconv2.bias",
+      "stages.2.1.gamma",
+      "stages.2.1.dwconv.bias",
+      "stages.2.1.norm.weight",
+      "stages.2.1.norm.bias",
+      "stages.2.1.pwconv1.bias",
+      "stages.2.1.pwconv2.bias",
+      "stages.2.2.gamma",
+      "stages.2.2.dwconv.bias",
+      "stages.2.2.norm.weight",
+      "stages.2.2.norm.bias",
+      "stages.2.2.pwconv1.bias",
+      "stages.2.2.pwconv2.bias",
+      "stages.2.3.gamma",
+      "stages.2.3.dwconv.bias",
+      "stages.2.3.norm.weight",
+      "stages.2.3.norm.bias",
+      "stages.2.3.pwconv1.bias",
+      "stages.2.3.pwconv2.bias",
+      "stages.2.4.gamma",
+      "stages.2.4.dwconv.bias",
+      "stages.2.4.norm.weight",
+      "stages.2.4.norm.bias",
+      "stages.2.4.pwconv1.bias",
+      "stages.2.4.pwconv2.bias",
+      "stages.2.5.gamma",
+      "stages.2.5.dwconv.bias",
+      "stages.2.5.norm.weight",
+      "stages.2.5.norm.bias",
+      "stages.2.5.pwconv1.bias",
+      "stages.2.5.pwconv2.bias",
+      "stages.2.6.gamma",
+      "stages.2.6.dwconv.bias",
+      "stages.2.6.norm.weight",
+      "stages.2.6.norm.bias",
+      "stages.2.6.pwconv1.bias",
+      "stages.2.6.pwconv2.bias",
+      "stages.2.7.gamma",
+      "stages.2.7.dwconv.bias",
+      "stages.2.7.norm.weight",
+      "stages.2.7.norm.bias",
+      "stages.2.7.pwconv1.bias",
+      "stages.2.7.pwconv2.bias",
+      "stages.2.8.gamma",
+      "stages.2.8.dwconv.bias",
+      "stages.2.8.norm.weight",
+      "stages.2.8.norm.bias",
+      "stages.2.8.pwconv1.bias",
+      "stages.2.8.pwconv2.bias",
+      "stages.3.0.gamma",
+      "stages.3.0.dwconv.bias",
+      "stages.3.0.norm.weight",
+      "stages.3.0.norm.bias",
+      "stages.3.0.pwconv1.bias",
+      "stages.3.0.pwconv2.bias",
+      "stages.3.1.gamma",
+      "stages.3.1.dwconv.bias",
+      "stages.3.1.norm.weight",
+      "stages.3.1.norm.bias",
+      "stages.3.1.pwconv1.bias",
+      "stages.3.1.pwconv2.bias",
+      "stages.3.2.gamma",
+      "stages.3.2.dwconv.bias",
+      "stages.3.2.norm.weight",
+      "stages.3.2.norm.bias",
+      "stages.3.2.pwconv1.bias",
+      "stages.3.2.pwconv2.bias",
+      "norm.weight",
+      "norm.bias",
+      "head.bias"
+    ],
+    "lr_scale": 1.0
+  }
+}
+/home/shahanahmed/.local/lib/python3.10/site-packages/timm/utils/cuda.py:50: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self._scaler = torch.cuda.amp.GradScaler()
+
+Current sparsity level: 1.1592622269705604e-07
+block 0
+block 1
+block 2
+block 3
+Actual sparsity after pruning: 1.0
+/home/shahanahmed/.local/lib/python3.10/site-packages/torch/utils/data/dataloader.py:557: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+Epoch: [0]  [  0/176]  eta: 0:43:04  lr: 0.000000  min_lr: 0.000000  loss: 7.0076 (7.0076)  class_acc: 0.0000 (0.0000)  weight_decay: 0.0500 (0.0500)  time: 14.6854  data: 3.1072  max mem: 1586
+Epoch: [0]  [ 10/176]  eta: 0:07:37  lr: 0.000005  min_lr: 0.000005  loss: 7.0438 (7.0505)  class_acc: 0.0000 (0.0007)  weight_decay: 0.0499 (0.0499)  time: 2.7542  data: 0.2836  max mem: 1586
+Epoch: [0]  [ 20/176]  eta: 0:05:44  lr: 0.000009  min_lr: 0.000009  loss: 7.0288 (7.0291)  class_acc: 0.0000 (0.0004)  weight_decay: 0.0495 (0.0495)  time: 1.5872  data: 0.0014  max mem: 1586
+Epoch: [0]  [ 30/176]  eta: 0:04:58  lr: 0.000014  min_lr: 0.000014  loss: 6.9912 (7.0140)  class_acc: 0.0000 (0.0005)  weight_decay: 0.0482 (0.0488)  time: 1.6569  data: 0.0018  max mem: 1586
+Epoch: [0]  [ 40/176]  eta: 0:04:28  lr: 0.000018  min_lr: 0.000018  loss: 6.9451 (6.9893)  class_acc: 0.0000 (0.0009)  weight_decay: 0.0462 (0.0479)  time: 1.7326  data: 0.0021  max mem: 1586
+Epoch: [0]  [ 50/176]  eta: 0:04:05  lr: 0.000023  min_lr: 0.000023  loss: 6.8785 (6.9553)  class_acc: 0.0039 (0.0016)  weight_decay: 0.0435 (0.0467)  time: 1.7984  data: 0.0020  max mem: 1586
+Epoch: [0]  [ 60/176]  eta: 0:03:44  lr: 0.000027  min_lr: 0.000027  loss: 6.7670 (6.9118)  class_acc: 0.0078 (0.0034)  weight_decay: 0.0402 (0.0454)  time: 1.8561  data: 0.0018  max mem: 1586
+Epoch: [0]  [ 70/176]  eta: 0:03:26  lr: 0.000032  min_lr: 0.000032  loss: 6.6183 (6.8587)  class_acc: 0.0156 (0.0052)  weight_decay: 0.0364 (0.0439)  time: 1.9531  data: 0.0025  max mem: 1586
+Epoch: [0]  [ 80/176]  eta: 0:03:08  lr: 0.000037  min_lr: 0.000037  loss: 6.4236 (6.7963)  class_acc: 0.0156 (0.0067)  weight_decay: 0.0323 (0.0422)  time: 2.0539  data: 0.0038  max mem: 1586
+Epoch: [0]  [ 90/176]  eta: 0:02:50  lr: 0.000041  min_lr: 0.000041  loss: 6.2421 (6.7223)  class_acc: 0.0156 (0.0083)  weight_decay: 0.0279 (0.0404)  time: 2.1208  data: 0.0037  max mem: 1586
+Epoch: [0]  [100/176]  eta: 0:02:32  lr: 0.000046  min_lr: 0.000046  loss: 6.0211 (6.6333)  class_acc: 0.0234 (0.0100)  weight_decay: 0.0234 (0.0385)  time: 2.1832  data: 0.0032  max mem: 1586
+Epoch: [0]  [110/176]  eta: 0:02:14  lr: 0.000050  min_lr: 0.000050  loss: 5.6846 (6.5417)  class_acc: 0.0234 (0.0111)  weight_decay: 0.0190 (0.0366)  time: 2.2555  data: 0.0038  max mem: 1586
+Epoch: [0]  [120/176]  eta: 0:01:55  lr: 0.000055  min_lr: 0.000055  loss: 5.5358 (6.4497)  class_acc: 0.0234 (0.0122)  weight_decay: 0.0148 (0.0347)  time: 2.3236  data: 0.0040  max mem: 1586
+Epoch: [0]  [130/176]  eta: 0:01:35  lr: 0.000059  min_lr: 0.000059  loss: 5.2913 (6.3574)  class_acc: 0.0234 (0.0133)  weight_decay: 0.0109 (0.0327)  time: 2.3425  data: 0.0038  max mem: 1586
+Epoch: [0]  [140/176]  eta: 0:01:15  lr: 0.000064  min_lr: 0.000064  loss: 5.1671 (6.2659)  class_acc: 0.0273 (0.0147)  weight_decay: 0.0074 (0.0308)  time: 2.3425  data: 0.0041  max mem: 1586
+Epoch: [0]  [150/176]  eta: 0:00:55  lr: 0.000069  min_lr: 0.000069  loss: 5.0348 (6.1838)  class_acc: 0.0273 (0.0158)  weight_decay: 0.0045 (0.0290)  time: 2.3411  data: 0.0035  max mem: 1586
+Epoch: [0]  [160/176]  eta: 0:00:34  lr: 0.000073  min_lr: 0.000073  loss: 4.9793 (6.1060)  class_acc: 0.0352 (0.0169)  weight_decay: 0.0023 (0.0273)  time: 2.3404  data: 0.0051  max mem: 1586
+Epoch: [0]  [170/176]  eta: 0:00:12  lr: 0.000078  min_lr: 0.000078  loss: 4.8789 (6.0321)  class_acc: 0.0352 (0.0179)  weight_decay: 0.0008 (0.0257)  time: 2.3381  data: 0.0046  max mem: 1586
+Epoch: [0]  [175/176]  eta: 0:00:02  lr: 0.000080  min_lr: 0.000080  loss: 4.8393 (6.0038)  class_acc: 0.0352 (0.0182)  weight_decay: 0.0004 (0.0251)  time: 2.2186  data: 0.0020  max mem: 1586
+Epoch: [0] Total time: 0:06:16 (2.1365 s / it)
+Averaged stats: lr: 0.000080  min_lr: 0.000080  loss: 4.8393 (6.0038)  class_acc: 0.0352 (0.0182)  weight_decay: 0.0004 (0.0251)
+/home/shahanahmed/.local/lib/python3.10/site-packages/torch/utils/data/dataloader.py:557: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+Test:  [  0/176]  eta: 0:13:49  loss: 4.7678 (4.7678)  acc1: 4.2969 (4.2969)  acc5: 12.1094 (12.1094)  time: 4.7132  data: 4.0169  max mem: 1586
+Test:  [ 10/176]  eta: 0:02:13  loss: 4.7505 (4.7550)  acc1: 4.2969 (4.1903)  acc5: 12.5000 (13.4943)  time: 0.8064  data: 0.4267  max mem: 1586
+Test:  [ 20/176]  eta: 0:01:29  loss: 4.7533 (4.7667)  acc1: 3.9062 (4.2039)  acc5: 12.8906 (13.8021)  time: 0.3648  data: 0.0390  max mem: 1586
+Test:  [ 30/176]  eta: 0:01:11  loss: 4.7648 (4.7609)  acc1: 3.9062 (4.0827)  acc5: 14.0625 (13.8483)  time: 0.3102  data: 0.0072  max mem: 1586
+Test:  [ 40/176]  eta: 0:01:00  loss: 4.7648 (4.7626)  acc1: 4.2969 (4.1825)  acc5: 14.0625 (13.9577)  time: 0.3053  data: 0.0034  max mem: 1586
+Test:  [ 50/176]  eta: 0:00:52  loss: 4.7697 (4.7637)  acc1: 4.2969 (4.1743)  acc5: 14.0625 (13.8787)  time: 0.3054  data: 0.0037  max mem: 1586
+Test:  [ 60/176]  eta: 0:00:46  loss: 4.7592 (4.7625)  acc1: 3.9062 (4.1944)  acc5: 14.0625 (14.0113)  time: 0.3064  data: 0.0045  max mem: 1586
+Test:  [ 70/176]  eta: 0:00:40  loss: 4.7214 (4.7606)  acc1: 3.9062 (4.1538)  acc5: 14.0625 (14.0130)  time: 0.3061  data: 0.0044  max mem: 1586
+Test:  [ 80/176]  eta: 0:00:35  loss: 4.7124 (4.7580)  acc1: 4.2969 (4.2486)  acc5: 14.4531 (14.1879)  time: 0.3059  data: 0.0046  max mem: 1586
+Test:  [ 90/176]  eta: 0:00:33  loss: 4.7303 (4.7608)  acc1: 4.2969 (4.2067)  acc5: 15.2344 (14.2428)  time: 0.4155  data: 0.0043  max mem: 1586
+Test:  [100/176]  eta: 0:00:29  loss: 4.7679 (4.7622)  acc1: 3.5156 (4.1422)  acc5: 13.6719 (14.1592)  time: 0.4157  data: 0.0048  max mem: 1586
+Test:  [110/176]  eta: 0:00:24  loss: 4.7697 (4.7620)  acc1: 3.5156 (4.0998)  acc5: 14.0625 (14.1716)  time: 0.3071  data: 0.0057  max mem: 1586
+Test:  [120/176]  eta: 0:00:20  loss: 4.7665 (4.7612)  acc1: 3.9062 (4.0838)  acc5: 14.0625 (14.1884)  time: 0.3066  data: 0.0055  max mem: 1586
+Test:  [130/176]  eta: 0:00:16  loss: 4.7473 (4.7600)  acc1: 4.2969 (4.1120)  acc5: 14.0625 (14.1937)  time: 0.3218  data: 0.0050  max mem: 1586
+Test:  [140/176]  eta: 0:00:13  loss: 4.7473 (4.7615)  acc1: 3.9062 (4.0946)  acc5: 13.6719 (14.0736)  time: 0.4659  data: 0.0046  max mem: 1586
+Test:  [150/176]  eta: 0:00:09  loss: 4.7882 (4.7645)  acc1: 3.5156 (4.0770)  acc5: 12.8906 (14.0392)  time: 0.4597  data: 0.0060  max mem: 1586
+Test:  [160/176]  eta: 0:00:06  loss: 4.7613 (4.7627)  acc1: 3.9062 (4.0664)  acc5: 14.0625 (14.0795)  time: 0.3161  data: 0.0062  max mem: 1586
+Test:  [170/176]  eta: 0:00:02  loss: 4.7550 (4.7636)  acc1: 4.2969 (4.0799)  acc5: 14.0625 (14.0625)  time: 0.3619  data: 0.0034  max mem: 1586
+Test:  [175/176]  eta: 0:00:00  loss: 4.7613 (4.7635)  acc1: 4.2969 (4.0800)  acc5: 14.0625 (14.0667)  time: 0.4899  data: 0.0022  max mem: 1586
+Test: Total time: 0:01:08 (0.3916 s / it)
+* Acc@1 4.080 Acc@5 14.067 loss 4.763
+Traceback (most recent call last):
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 528, in <module>
+    main(args)
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 521, in main
+    train_with_pruning(model,dataset_train, dataset_val,device,args)
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 364, in train_with_pruning
+    train_outputs, train_targets = evaluate(train_loader, model, device, use_amp=args.use_amp)
+ValueError: too many values to unpack (expected 2)
+Traceback (most recent call last):
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 528, in <module>
+    main(args)
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 521, in main
+    train_with_pruning(model,dataset_train, dataset_val,device,args)
+  File "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py", line 364, in train_with_pruning
+    train_outputs, train_targets = evaluate(train_loader, model, device, use_amp=args.use_amp)
+ValueError: too many values to unpack (expected 2)

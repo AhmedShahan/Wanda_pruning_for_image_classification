@@ -160,6 +160,7 @@ def prune_vit(args, model, calib_data, device):
 
             subset[name].weight.data[W_mask] = 0
         ##############################################
+import torch
 
 def prune_convnext(args, model, calib_data, device):
     inps = calib_data 
@@ -178,7 +179,7 @@ def prune_convnext(args, model, calib_data, device):
 
     thresh = None 
     for block_id in range(4):
-        print(f"block {block_id}")
+        print(f"Block {block_id}")
         subset = find_layers(model.stages[block_id])
 
         if require_forward:
@@ -186,7 +187,7 @@ def prune_convnext(args, model, calib_data, device):
             if bs > 1024:
                 tmp_res = []
                 for i1 in range(0, bs, 512):
-                    j1 = min(i1+512, bs)
+                    j1 = min(i1 + 512, bs)
                     tmp_res.append(layer(inps[i1:j1]))
                 inps = torch.cat(tmp_res, dim=0)
             else:
@@ -203,12 +204,12 @@ def prune_convnext(args, model, calib_data, device):
 
             handles = []
             for name in wrapped_layers:
-               handles.append(subset[name].register_forward_hook(add_batch(name)))
+                handles.append(subset[name].register_forward_hook(add_batch(name)))
             layer = model.stages[block_id]
             if bs > 1024:
                 tmp_res = []
                 for i1 in range(0, bs, 512):
-                    j1 = min(i1+512, bs)
+                    j1 = min(i1 + 512, bs)
                     tmp_res.append(layer(inps[i1:j1]))
                 inps = torch.cat(tmp_res, dim=0)
             else:
@@ -216,12 +217,56 @@ def prune_convnext(args, model, calib_data, device):
             for h in handles:
                 h.remove()
 
-        ################# pruning ###################
+        ################# Pruning ###################
         for name in subset:
             if args.prune_metric == "wanda":
-                metric_stats[block_id][name] *= torch.sqrt(wrapped_layers[name].scaler_row.reshape((1,-1)))
+                metric_stats[block_id][name] *= torch.sqrt(wrapped_layers[name].scaler_row.reshape((1, -1)))
+
+            # Debugging: Check the metric before computing the mask
+            print(f"Layer: {name}, Metric before mask: {metric_stats[block_id][name]}")
 
             W_mask = compute_mask(metric_stats[block_id][name], args.prune_granularity, args.sparsity)
 
+            if W_mask is None:
+                print(f"Warning: W_mask is None for {name}. Skipping pruning for this layer.")
+                continue  # Skip this layer or handle it accordingly
+
+            # Debugging: Check the mask and weights
+            print(f"W_mask for {name}: {W_mask}, Shape: {W_mask.shape}")
+            print(f"Weight shape for {name}: {subset[name].weight.data.shape}")
+
             subset[name].weight.data[W_mask] = 0
+
+            # Debugging: Check the number of non-zero weights after pruning
+            print(f"Non-zero weights for {name} after pruning: {torch.count_nonzero(subset[name].weight.data)}")
         ##############################################
+
+def compute_mask(metric, granularity, sparsity):
+    # Add your mask computation logic here
+    # For demonstration purposes, we'll assume this function returns a valid mask or None
+    # Ensure to check for sparsity and granularity in your implementation.
+    if metric is None or metric.numel() == 0:
+        return None  # Return None for invalid metrics
+    # Example mask computation logic (this should be tailored to your use case)
+    threshold = torch.quantile(metric, sparsity)
+    W_mask = metric < threshold
+    return W_mask
+
+def check_sparsity(model):
+    total_params = 0
+    total_sparsity = 0
+    for param in model.parameters():
+        total_params += param.numel()
+        total_sparsity += torch.sum(param == 0).item()
+    return total_sparsity / total_params
+
+# Usage example (not complete, as it requires the actual model and args)
+# args = ...  # Set your args here
+# model = ...  # Your ConvNext model here
+# calib_data = ...  # Your calibration data here
+# device = ...  # Your device (e.g., 'cuda' or 'cpu')
+# with torch.no_grad():
+#     if "convnext" in args.model:
+#         prune_convnext(args, model, calib_data, device)
+#     actual_sparsity = check_sparsity(model)
+#     print(f"Actual sparsity after pruning: {actual_sparsity}")
