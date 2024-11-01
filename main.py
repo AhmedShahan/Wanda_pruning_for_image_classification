@@ -163,7 +163,7 @@ def get_args_parser():
     parser.add_argument('--model_prefix', default='', type=str)
 
     # Dataset parameters
-    parser.add_argument('--data_path', default='DATASET', type=str,
+    parser.add_argument('--data_path', default='/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/DATASET/cifat100', type=str,
                         help='dataset path')
     parser.add_argument('--eval_data_path', default=None, type=str,
                         help='dataset path for evaluation')
