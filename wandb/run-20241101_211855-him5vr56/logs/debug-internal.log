@@ -1,0 +1,16 @@
+{"time":"2024-11-01T21:18:55.398086021+06:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-11-01T21:18:55.398284058+06:00","level":"INFO","msg":"created symlink","path":"/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241101_211855-him5vr56/logs/debug-core.log"}
+{"time":"2024-11-01T21:18:55.516704054+06:00","level":"INFO","msg":"created new stream","id":"him5vr56"}
+{"time":"2024-11-01T21:18:55.516795218+06:00","level":"INFO","msg":"stream: started","id":"him5vr56"}
+{"time":"2024-11-01T21:18:55.516908414+06:00","level":"INFO","msg":"sender: started","stream_id":"him5vr56"}
+{"time":"2024-11-01T21:18:55.516856869+06:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"him5vr56"}}
+{"time":"2024-11-01T21:18:55.516915912+06:00","level":"INFO","msg":"handler: started","stream_id":{"value":"him5vr56"}}
+{"time":"2024-11-01T21:18:56.084458899+06:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-11-01T21:18:56.930803701+06:00","level":"INFO","msg":"stream: closing","id":"him5vr56"}
+{"time":"2024-11-01T21:18:56.931060645+06:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-11-01T21:18:56.932946119+06:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-11-01T21:18:58.992083295+06:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-11-01T21:18:59.428465553+06:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"him5vr56"}}
+{"time":"2024-11-01T21:18:59.428532969+06:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"him5vr56"}}
+{"time":"2024-11-01T21:18:59.428546199+06:00","level":"INFO","msg":"sender: closed","stream_id":"him5vr56"}
+{"time":"2024-11-01T21:18:59.42864041+06:00","level":"INFO","msg":"stream: closed","id":"him5vr56"}

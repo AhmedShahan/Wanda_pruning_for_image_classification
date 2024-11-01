@@ -260,13 +260,13 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
     print("###############\nTrain with prune\n")
     
     mixup_fn = None
-    mixup_active = args.mixup > 0 or args.cutmix > 0. or args.cutmix_minmax is not None
-    if mixup_active:
-        print("Mixup is activated!")
-        mixup_fn = Mixup(
-            mixup_alpha=args.mixup, cutmix_alpha=args.cutmix, cutmix_minmax=args.cutmix_minmax,
-            prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
-            label_smoothing=args.smoothing, num_classes=args.nb_classes)
+    # mixup_active = args.mixup > 0 or args.cutmix > 0. or args.cutmix_minmax is not None
+    # if mixup_active:
+    #     print("Mixup is activated!")
+    #     mixup_fn = Mixup(
+    #         mixup_alpha=args.mixup, cutmix_alpha=args.cutmix, cutmix_minmax=args.cutmix_minmax,
+    #         prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
+    #         label_smoothing=args.smoothing, num_classes=args.nb_classes)
         
 
 
@@ -363,23 +363,18 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
                         use_amp=args.use_amp
                     )
 
-
-            '''
-                        model=model,
-                            criterion=criterion,
-                            data_loader=train_loader,
-                            optimizer=optimizer,
-                            device=device,
-                            epoch=epoch,
-                            loss_scaler=loss_scaler,
-                            # args=args
-                            update_freq=args.update_freq
-            '''
-
-
             # Evaluate on validation set
             test_stats = evaluate(val_loader, model, device, use_amp=args.use_amp)
             
+            
+                # Measure accuracy
+            metric_logger = utils.MetricLogger(delimiter="  ")
+            acc1, acc5 = accuracy(outputs, targets, topk=(1, 5))
+            batch_size = args.batch_size
+            metric_logger.update(loss=loss.item())
+            metric_logger.update(lr=optimizer.param_groups[0]["lr"])
+            metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
+            metric_logger.meters['acc5'].update(acc5.item(), n=batch_size)
             print(f"Epoch {epoch}")
             print(f"Training error: {100 - train_stats['acc1']:.2f}%")
             print(f"Testing error: {100 - test_stats['acc1']:.2f}%")
