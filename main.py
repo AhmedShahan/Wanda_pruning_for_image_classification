@@ -20,7 +20,7 @@ from pathlib import Path
 from timm.data.mixup import Mixup
 from timm.models import create_model
 from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
-from timm.utils import ModelEma
+from timm.utils import ModelEma,NativeScaler
 from optim_factory import create_optimizer, LayerDecayValueAssigner
 
 from datasets import build_dataset
@@ -225,7 +225,136 @@ def get_args_parser():
 
     return parser
 
+import torch
+
+def accuracy(outputs, targets, topk=(1,)):
+    """Computes the accuracy over the top k predictions for the specified values of k"""
+    maxk = max(topk)
+    batch_size = targets.size(0)
+
+    _, pred = outputs.topk(maxk, 1, True, True)
+    pred = pred.t()
+    correct = pred.eq(targets.view(1, -1).expand_as(pred))
+
+    res = []
+    for k in topk:
+        correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
+        res.append(correct_k.mul_(100.0 / batch_size))
+    return res
+
+
+
+def train_with_pruning(model, dataset_train, dataset_val, device, args):
+    print("###############\nTrain with prune\n")
+    # Setup data loaders
+    train_loader = torch.utils.data.DataLoader(
+        dataset_train,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers
+    )
+    
+    val_loader = torch.utils.data.DataLoader(
+        dataset_val,
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=args.num_workers
+    )
+
+    # Setup optimizer and criterion
+    optimizer = create_optimizer(args, model)
+    loss_scaler = NativeScaler() # if args.use_amp is False, this won't be used
+
+    criterion = torch.nn.CrossEntropyLoss()
+    # current_sparsity = args.sparsity
+    # print("Current Sparcity", current_sparsity)
+    actual_sparsity=check_sparsity(model)
+    while actual_sparsity > 0:
+        print(f"\nCurrent sparsity level: {actual_sparsity}")
+        
+        # Pruning step
+        np.random.seed(0)
+        calibration_ids = np.random.choice(len(dataset_train), args.nsamples)
+        calib_data = []
+        for i in calibration_ids:
+            calib_data.append(dataset_train[i][0].unsqueeze(dim=0))
+        calib_data = torch.cat(calib_data, dim=0).to(device)
+
+        with torch.no_grad():
+            if "convnext" in args.model:
+                prune_convnext(args, model, calib_data, device)
+        
+        actual_sparsity = check_sparsity(model)
+        print(f"Actual sparsity after pruning: {actual_sparsity}")
+
+        # Training loop for current sparsity level
+        best_acc = 0.0
+        for epoch in range(args.epochs):
+            # Train for one epoch
+            train_stats = train_one_epoch(
+                model=model,
+                criterion=criterion,
+                data_loader=train_loader,
+                optimizer=optimizer,
+                device=device,
+                epoch=epoch,
+                loss_scaler=loss_scaler,
+                # args=args
+            )
+
+            # Evaluate on validation set
+            test_stats = evaluate(val_loader, model, device, use_amp=args.use_amp)
+            
+            print(f"Epoch {epoch}")
+            print(f"Training error: {100 - train_stats['acc1']:.2f}%")
+            print(f"Testing error: {100 - test_stats['acc1']:.2f}%")
+        current_sparsity = max(0, current_sparsity - args.sparsity_step)
+        args.sparsity = current_sparsity
+
+# def train_one_epoch(model, criterion, data_loader, optimizer, device, epoch, args):
+#     model.train()
+#     metric_logger = utils.MetricLogger(delimiter="  ")
+#     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
+#     header = 'Epoch: [{}]'.format(epoch)
+
+#     for samples, targets in metric_logger.log_every(data_loader, args.print_freq, header):
+#         samples = samples.to(device, non_blocking=True)
+#         targets = targets.to(device, non_blocking=True)
+
+#         # Compute output
+#         with torch.cuda.amp.autocast(enabled=args.use_amp):
+#             outputs = model(samples)
+#             loss = criterion(outputs, targets)
+
+#         # Compute gradient and optimize
+#         optimizer.zero_grad()
+#         if args.use_amp:
+#             scaler = torch.cuda.amp.GradScaler()
+#             scaler.scale(loss).backward()
+#             scaler.step(optimizer)
+#             scaler.update()
+#         else:
+#             loss.backward()
+#             optimizer.step()
+
+#         # Measure accuracy
+#         acc1, acc5 = accuracy(outputs, targets, topk=(1, 5))
+#         batch_size = samples.shape[0]
+#         metric_logger.update(loss=loss.item())
+#         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
+#         metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
+#         metric_logger.meters['acc5'].update(acc5.item(), n=batch_size)
+
+#     # Return training statistics
+#     return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
+
+
+
+
+
+
 def main(args):
+    print("Main function called")
     utils.init_distributed_mode(args)
     print(args)
     device = torch.device(args.device)
@@ -302,44 +431,7 @@ def main(args):
     # ConvNeXt does not support dropout.
     assert(args.dropout == 0 if args.model.startswith("convnext") else True)
 
-
-    # if "convnext" in args.model:
-    #     checkpoint = torch.load(args.resume, map_location='cpu')
-    #     model.load_state_dict(checkpoint["model"])
-    # elif "vit" in args.model:
-    #     checkpoint = torch.load(args.resume, map_location='cpu')
-    #     model.load_state_dict(checkpoint)
-    # elif "deit" in args.model:
-    #     checkpoint = torch.load(args.resume, map_location='cpu')
-    #     model.load_state_dict(checkpoint["model"])
-
-    ################################################################################
-    np.random.seed(0)
-    calibration_ids = np.random.choice(len(dataset_train), args.nsamples)
-    calib_data = []
-    for i in calibration_ids:
-        calib_data.append(dataset_train[i][0].unsqueeze(dim=0))
-    calib_data = torch.cat(calib_data, dim=0).to(device)
-
-    tick = time.time()
-    if args.sparsity != 0:
-        with torch.no_grad():
-            if "convnext" in args.model:
-                prune_convnext(args, model, calib_data, device)
-            elif "vit" in args.model:
-                prune_vit(args, model, calib_data, device)
-            elif "deit" in args.model:
-                prune_vit(args, model, calib_data, device)
-    ################################################################################
-
-    actual_sparsity = check_sparsity(model)
-    print(f"actual sparsity {actual_sparsity}")
-
-    print(f"Eval only mode")
-    test_stats = evaluate(data_loader_val, model, device, use_amp=args.use_amp)
-    val_acc = test_stats["acc1"]
-    print(f"Accuracy of the network on {len(dataset_val)} test images: {test_stats['acc1']:.5f}%")
-    return
+    train_with_pruning(model,dataset_train, dataset_val,device,args)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('ConvNeXt training and evaluation script', parents=[get_args_parser()])
