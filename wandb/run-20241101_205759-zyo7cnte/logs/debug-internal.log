@@ -1,0 +1,16 @@
+{"time":"2024-11-01T20:57:59.835246831+06:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-11-01T20:57:59.835271254+06:00","level":"INFO","msg":"created symlink","path":"/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241101_205759-zyo7cnte/logs/debug-core.log"}
+{"time":"2024-11-01T20:57:59.940059382+06:00","level":"INFO","msg":"created new stream","id":"zyo7cnte"}
+{"time":"2024-11-01T20:57:59.940139898+06:00","level":"INFO","msg":"stream: started","id":"zyo7cnte"}
+{"time":"2024-11-01T20:57:59.940282439+06:00","level":"INFO","msg":"sender: started","stream_id":"zyo7cnte"}
+{"time":"2024-11-01T20:57:59.94020235+06:00","level":"INFO","msg":"handler: started","stream_id":{"value":"zyo7cnte"}}
+{"time":"2024-11-01T20:57:59.94016832+06:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"zyo7cnte"}}
+{"time":"2024-11-01T20:58:00.53317057+06:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-11-01T20:58:00.86312423+06:00","level":"INFO","msg":"stream: closing","id":"zyo7cnte"}
+{"time":"2024-11-01T20:58:00.863302549+06:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-11-01T20:58:00.865492728+06:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-11-01T20:58:03.021554781+06:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-11-01T20:58:03.509644318+06:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"zyo7cnte"}}
+{"time":"2024-11-01T20:58:03.509730543+06:00","level":"INFO","msg":"sender: closed","stream_id":"zyo7cnte"}
+{"time":"2024-11-01T20:58:03.509721619+06:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"zyo7cnte"}}
+{"time":"2024-11-01T20:58:03.509928383+06:00","level":"INFO","msg":"stream: closed","id":"zyo7cnte"}

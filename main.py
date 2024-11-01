@@ -33,7 +33,7 @@ import models.vision_transformer
 import models.swin_transformer
 import models.mlp_mixer
 import models.deit 
-
+from drop_scheduler import drop_scheduler
 from prune_utils import prune_convnext, prune_deit, prune_vit, check_sparsity 
 
 def str2bool(v):
@@ -174,6 +174,9 @@ def get_args_parser():
                         type=str, help='ImageNet dataset path')
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
+    
+    parser.add_argument('--log_dir', default=None,
+                        help='path where to tensorboard log')
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
     parser.add_argument('--seed', default=0, type=int)
@@ -245,7 +248,29 @@ def accuracy(outputs, targets, topk=(1,)):
 
 
 def train_with_pruning(model, dataset_train, dataset_val, device, args):
+    model_ema = None
+    if args.model_ema:
+        # Important to create EMA model after cuda(), DP wrapper, and AMP but before SyncBN and DDP wrapper
+        model_ema = ModelEma(
+            model,
+            decay=args.model_ema_decay,
+            device='cpu' if args.model_ema_force_cpu else '',
+            resume='')
+        print("Using EMA with decay = %.8f" % args.model_ema_decay)
     print("###############\nTrain with prune\n")
+    
+    mixup_fn = None
+    mixup_active = args.mixup > 0 or args.cutmix > 0. or args.cutmix_minmax is not None
+    if mixup_active:
+        print("Mixup is activated!")
+        mixup_fn = Mixup(
+            mixup_alpha=args.mixup, cutmix_alpha=args.cutmix, cutmix_minmax=args.cutmix_minmax,
+            prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
+            label_smoothing=args.smoothing, num_classes=args.nb_classes)
+        
+
+
+
     # Setup data loaders
     train_loader = torch.utils.data.DataLoader(
         dataset_train,
@@ -260,6 +285,44 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
         shuffle=False,
         num_workers=args.num_workers
     )
+
+    num_training_steps_per_epoch = len(dataset_train) // args.batch_size
+    
+    log_writer = utils.TensorboardLogger(log_dir=args.log_dir)
+    if log_writer is not None:
+            log_writer.set_step(args.epochs * num_training_steps_per_epoch * args.update_freq)
+
+
+    wandb_logger = utils.WandbLogger(args)
+
+    lr_schedule_values = utils.cosine_scheduler(
+        args.lr, args.min_lr, args.epochs, num_training_steps_per_epoch,
+        warmup_epochs=args.warmup_epochs, warmup_steps=args.warmup_steps,
+    )
+
+    wd_schedule_values = utils.cosine_scheduler(args.weight_decay, args.weight_decay_end, args.epochs, num_training_steps_per_epoch)
+    print("Max WD = %.7f, Min WD = %.7f" % (max(wd_schedule_values), min(wd_schedule_values)))
+
+
+    schedules = {}
+
+    # At most one of dropout and stochastic depth should be enabled.
+    assert(args.dropout == 0 or args.drop_path == 0)
+    # ConvNeXt does not support dropout.
+    assert(args.dropout == 0 if args.model.startswith("convnext") else True)
+
+    if args.dropout > 0:
+        schedules['do'] = drop_scheduler(
+            args.dropout, args.epochs, num_training_steps_per_epoch,
+            args.cutoff_epoch, args.drop_mode, args.drop_schedule)
+        print("Min DO = %.7f, Max DO = %.7f" % (min(schedules['do']), max(schedules['do'])))
+
+    if args.drop_path > 0:
+        schedules['dp'] = drop_scheduler(
+            args.drop_path, args.epochs, num_training_steps_per_epoch,
+            args.cutoff_epoch, args.drop_mode, args.drop_schedule)
+        print("Min DP = %.7f, Max DP = %.7f" % (min(schedules['dp']), max(schedules['dp'])))
+
 
     # Setup optimizer and criterion
     optimizer = create_optimizer(args, model)
@@ -292,15 +355,27 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
         for epoch in range(args.epochs):
             # Train for one epoch
             train_stats = train_one_epoch(
-                model=model,
-                criterion=criterion,
-                data_loader=train_loader,
-                optimizer=optimizer,
-                device=device,
-                epoch=epoch,
-                loss_scaler=loss_scaler,
-                # args=args
-            )
+                        model, criterion, train_loader, optimizer,
+                        device, epoch, loss_scaler, args.clip_grad, model_ema, mixup_fn,
+                        log_writer=log_writer, wandb_logger=wandb_logger, start_steps=epoch * num_training_steps_per_epoch,
+                        lr_schedule_values=lr_schedule_values, wd_schedule_values=wd_schedule_values, schedules=schedules,
+                        num_training_steps_per_epoch=num_training_steps_per_epoch, update_freq=args.update_freq,
+                        use_amp=args.use_amp
+                    )
+
+
+            '''
+                        model=model,
+                            criterion=criterion,
+                            data_loader=train_loader,
+                            optimizer=optimizer,
+                            device=device,
+                            epoch=epoch,
+                            loss_scaler=loss_scaler,
+                            # args=args
+                            update_freq=args.update_freq
+            '''
+
 
             # Evaluate on validation set
             test_stats = evaluate(val_loader, model, device, use_amp=args.use_amp)
@@ -378,6 +453,7 @@ def main(args):
     sampler_train = torch.utils.data.DistributedSampler(
         dataset_train, num_replicas=num_tasks, rank=global_rank, shuffle=True, seed=args.seed,
     )
+    
     print("Sampler_train = %s" % str(sampler_train))
     if args.dist_eval:
         if len(dataset_val) % num_tasks != 0:

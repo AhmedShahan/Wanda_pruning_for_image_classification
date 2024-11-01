@@ -167,7 +167,9 @@ class MetricLogger(object):
 
 class TensorboardLogger(object):
     def __init__(self, log_dir):
-        self.writer = SummaryWriter(logdir=log_dir)
+        # self.writer = SummaryWriter(logdir=log_dir)
+        self.writer = SummaryWriter()
+
         self.step = 0
 
     def set_step(self, step=None):
