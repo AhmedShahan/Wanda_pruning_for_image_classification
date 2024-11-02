@@ -1,0 +1,16 @@
+{"time":"2024-11-02T20:37:21.352150987+06:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-11-02T20:37:21.352263127+06:00","level":"INFO","msg":"created symlink","path":"/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241102_203721-popolay8/logs/debug-core.log"}
+{"time":"2024-11-02T20:37:21.471157304+06:00","level":"INFO","msg":"created new stream","id":"popolay8"}
+{"time":"2024-11-02T20:37:21.471365638+06:00","level":"INFO","msg":"stream: started","id":"popolay8"}
+{"time":"2024-11-02T20:37:21.471599569+06:00","level":"INFO","msg":"handler: started","stream_id":{"value":"popolay8"}}
+{"time":"2024-11-02T20:37:21.472233502+06:00","level":"INFO","msg":"sender: started","stream_id":"popolay8"}
+{"time":"2024-11-02T20:37:21.472248037+06:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"popolay8"}}
+{"time":"2024-11-02T20:37:22.084860413+06:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-11-02T21:06:30.975973039+06:00","level":"INFO","msg":"stream: closing","id":"popolay8"}
+{"time":"2024-11-02T21:06:30.976086743+06:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-11-02T21:06:30.986135035+06:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-11-02T21:06:36.384559922+06:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-11-02T21:06:36.818915952+06:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"popolay8"}}
+{"time":"2024-11-02T21:06:36.819006422+06:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"popolay8"}}
+{"time":"2024-11-02T21:06:36.81902235+06:00","level":"INFO","msg":"sender: closed","stream_id":"popolay8"}
+{"time":"2024-11-02T21:06:36.819074958+06:00","level":"INFO","msg":"stream: closed","id":"popolay8"}

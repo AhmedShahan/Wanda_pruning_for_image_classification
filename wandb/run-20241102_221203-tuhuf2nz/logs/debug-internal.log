@@ -1,0 +1,16 @@
+{"time":"2024-11-02T22:12:03.37139494+06:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-11-02T22:12:03.371437053+06:00","level":"INFO","msg":"created symlink","path":"/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241102_221203-tuhuf2nz/logs/debug-core.log"}
+{"time":"2024-11-02T22:12:03.480637964+06:00","level":"INFO","msg":"created new stream","id":"tuhuf2nz"}
+{"time":"2024-11-02T22:12:03.480715141+06:00","level":"INFO","msg":"stream: started","id":"tuhuf2nz"}
+{"time":"2024-11-02T22:12:03.48081634+06:00","level":"INFO","msg":"sender: started","stream_id":"tuhuf2nz"}
+{"time":"2024-11-02T22:12:03.480755191+06:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"tuhuf2nz"}}
+{"time":"2024-11-02T22:12:03.480787685+06:00","level":"INFO","msg":"handler: started","stream_id":{"value":"tuhuf2nz"}}
+{"time":"2024-11-02T22:12:04.274582158+06:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-11-02T22:12:13.211319457+06:00","level":"INFO","msg":"stream: closing","id":"tuhuf2nz"}
+{"time":"2024-11-02T22:12:13.211467348+06:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-11-02T22:12:13.213734837+06:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-11-02T22:12:14.625885885+06:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-11-02T22:12:15.089842184+06:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"tuhuf2nz"}}
+{"time":"2024-11-02T22:12:15.089889103+06:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"tuhuf2nz"}}
+{"time":"2024-11-02T22:12:15.089918232+06:00","level":"INFO","msg":"sender: closed","stream_id":"tuhuf2nz"}
+{"time":"2024-11-02T22:12:15.090031762+06:00","level":"INFO","msg":"stream: closed","id":"tuhuf2nz"}

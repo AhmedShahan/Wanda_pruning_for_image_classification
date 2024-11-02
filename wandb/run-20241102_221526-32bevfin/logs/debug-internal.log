@@ -1,0 +1,16 @@
+{"time":"2024-11-02T22:15:26.870457725+06:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-11-02T22:15:26.870572383+06:00","level":"INFO","msg":"created symlink","path":"/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241102_221526-32bevfin/logs/debug-core.log"}
+{"time":"2024-11-02T22:15:26.985135258+06:00","level":"INFO","msg":"created new stream","id":"32bevfin"}
+{"time":"2024-11-02T22:15:26.985447048+06:00","level":"INFO","msg":"stream: started","id":"32bevfin"}
+{"time":"2024-11-02T22:15:26.985731564+06:00","level":"INFO","msg":"sender: started","stream_id":"32bevfin"}
+{"time":"2024-11-02T22:15:26.985652056+06:00","level":"INFO","msg":"handler: started","stream_id":{"value":"32bevfin"}}
+{"time":"2024-11-02T22:15:26.98559107+06:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"32bevfin"}}
+{"time":"2024-11-02T22:15:27.653974536+06:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-11-02T22:15:36.348078743+06:00","level":"INFO","msg":"stream: closing","id":"32bevfin"}
+{"time":"2024-11-02T22:15:36.348363947+06:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2024-11-02T22:15:36.352452215+06:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2024-11-02T22:15:37.757081655+06:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2024-11-02T22:15:38.230964731+06:00","level":"INFO","msg":"handler: closed","stream_id":{"value":"32bevfin"}}
+{"time":"2024-11-02T22:15:38.231028093+06:00","level":"INFO","msg":"sender: closed","stream_id":"32bevfin"}
+{"time":"2024-11-02T22:15:38.231014367+06:00","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"32bevfin"}}
+{"time":"2024-11-02T22:15:38.231162055+06:00","level":"INFO","msg":"stream: closed","id":"32bevfin"}

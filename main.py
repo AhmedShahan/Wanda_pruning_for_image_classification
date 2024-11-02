@@ -170,7 +170,7 @@ def get_args_parser():
     parser.add_argument('--nb_classes', default=100, type=int,
                         help='number of the classification types')
     parser.add_argument('--imagenet_default_mean_and_std', type=str2bool, default=True)
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR', 'IMNET', 'image_folder'],
+    parser.add_argument('--data_set', default='CIFAR', choices=['CIFAR', 'IMNET', 'image_folder'],
                         type=str, help='ImageNet dataset path')
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
@@ -223,7 +223,7 @@ def get_args_parser():
     parser.add_argument("--nsamples", type=int, default=4096)
     parser.add_argument("--sparsity", type=float, default=0.)
     parser.add_argument("--prune_metric", type=str, choices=["magnitude", "wanda"])
-    parser.add_argument("--prune_granularity", type=str)
+    parser.add_argument("--prune_granularity", type=str,default='per_layer')
     parser.add_argument("--blocksize", type=int, default=1)
 
     return parser
@@ -331,12 +331,16 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
     criterion = torch.nn.CrossEntropyLoss()
     # current_sparsity = args.sparsity
     # print("Current Sparcity", current_sparsity)
-    actual_sparsity = check_sparsity(model)
+    overall_sparcity = check_sparsity(model)
     pruneRound=0
-    while actual_sparsity > 0:
+    
+    while overall_sparcity < 95:
         pruneRound+=1
         print(f"**************Prune Round {pruneRound}**********************")
-        print(f"\nCurrent sparsity level: {actual_sparsity}")
+        print(f"\nCurrent sparsity level: {overall_sparcity}")
+        # Count initial non-zero weights
+        initial_nonzero = sum([torch.sum(p != 0).item() for p in model.parameters()])
+        print(f"Non-zero weights before pruning: {initial_nonzero}")
         
         # Pruning step
         np.random.seed(0)
@@ -346,62 +350,69 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
 
         with torch.no_grad():
             if "convnext" in args.model:
-                prune_convnext(args, model, calib_data, device)
+                model = prune_convnext(args, model, calib_data, device)
         
-        actual_sparsity = check_sparsity(model)
-        print(f"Actual sparsity after pruning: {actual_sparsity}")
-
+        # Check sparsity after pruning
+        post_prune_sparcity = check_sparsity(model)
+        post_prune_nonzero = sum([torch.sum(p != 0).item() for p in model.parameters()])
+        print(f"Sparsity after pruning: {post_prune_sparcity:.4f}")
+        print(f"Non-zero weights after pruning: {post_prune_nonzero}")
+        
         # Training loop for the current sparsity level
         for epoch in range(args.epochs):
-            ###Train for one epoch
+            print(f"\nEpoch {epoch+1}/{args.epochs}")
+            
+            # Train for one epoch
             train_stats = train_one_epoch(
                 model, criterion, train_loader, optimizer,
                 device, epoch, loss_scaler, args.clip_grad, model_ema, mixup_fn,
-                log_writer=log_writer, wandb_logger=wandb_logger, start_steps=epoch * num_training_steps_per_epoch,
-                lr_schedule_values=lr_schedule_values, wd_schedule_values=wd_schedule_values, schedules=schedules,
-                num_training_steps_per_epoch=num_training_steps_per_epoch, update_freq=args.update_freq,
+                log_writer=log_writer, wandb_logger=wandb_logger, 
+                start_steps=epoch * num_training_steps_per_epoch,
+                lr_schedule_values=lr_schedule_values, 
+                wd_schedule_values=wd_schedule_values, 
+                schedules=schedules,
+                num_training_steps_per_epoch=num_training_steps_per_epoch, 
+                update_freq=args.update_freq,
                 use_amp=args.use_amp
             )
-            # Convert training outputs and targets to indices
+
+            # Evaluation code
             def convert_to_indices(labels, label_to_index):
                 return [label_to_index[label] for label in labels]
 
             # Evaluate on training set
             train_outputs, train_targets, _ = evaluate(train_loader, model, device, use_amp=args.use_amp)
-
-            # Create label_to_index mapping for the current epoch
             label_to_index = {label: idx for idx, label in enumerate(set(train_targets + train_outputs))}
-
-            # Convert training outputs and targets to indices
+            
             train_outputs_indices = convert_to_indices(train_outputs, label_to_index)
             train_targets_indices = convert_to_indices(train_targets, label_to_index)
-
-            # Calculate training accuracy and error
+            
             train_correct = sum([1 for output, target in zip(train_outputs_indices, train_targets_indices) if output == target])
             train_total = len(train_targets_indices)
             train_accuracy = train_correct / train_total * 100
-            train_error = 100 - train_accuracy
 
             # Evaluate on validation set
             test_outputs, test_targets, _ = evaluate(val_loader, model, device, use_amp=args.use_amp)
-
-            # Update label_to_index to include any new labels in test set
             label_to_index.update({label: idx for idx, label in enumerate(set(test_targets + test_outputs), start=len(label_to_index))})
-
-            # Convert testing outputs and targets to indices
+            
             test_outputs_indices = convert_to_indices(test_outputs, label_to_index)
             test_targets_indices = convert_to_indices(test_targets, label_to_index)
-
-            # Calculate testing accuracy and error
+            
             test_correct = sum([1 for output, target in zip(test_outputs_indices, test_targets_indices) if output == target])
             test_total = len(test_targets_indices)
             test_accuracy = test_correct / test_total * 100
-            test_error = 100 - test_accuracy
+            
+            print(f"Training Accuracy: {train_accuracy:.2f}%")
+            print(f"Testing Accuracy: {test_accuracy:.2f}%")
 
-            # print(f"Epoch {epoch}: Training Error = {train_error:.2f}%, Testing Error = {test_error:.2f}%")
-
-        actual_sparsity = check_sparsity(model)
-
+        # Update overall sparsity
+        overall_sparcity = check_sparsity(model)
+        final_nonzero = sum([torch.sum(p != 0).item() for p in model.parameters()])
+        print(f"\nFinal sparsity after training: {overall_sparcity:.4f}")
+        print(f"Final non-zero weights: {final_nonzero}")
+        
+    # return model
+        
 # def train_one_epoch(model, criterion, data_loader, optimizer, device, epoch, args):
 #     model.train()
 #     metric_logger = utils.MetricLogger(delimiter="  ")

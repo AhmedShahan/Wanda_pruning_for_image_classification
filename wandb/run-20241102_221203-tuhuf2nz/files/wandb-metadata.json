@@ -1,0 +1,43 @@
+{
+  "os":  "Linux-6.9.3-76060903-generic-x86_64-with-glibc2.35",
+  "python":  "3.10.12",
+  "startedAt":  "2024-11-02T16:12:03.367800Z",
+  "program":  "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py",
+  "codePath":  "main.py",
+  "git":  {
+    "remote":  "https://github.com/AhmedShahan/Wanda_pruning_for_image_classification.git",
+    "commit":  "68afa38a6932001c0e56c81a58b54758bb7f0136"
+  },
+  "email":  "shahan.ahmed001@gmail.com",
+  "root":  "/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification",
+  "host":  "shahan-pc",
+  "username":  "shahanahmed",
+  "executable":  "/bin/python3",
+  "codePathLocal":  "main.py",
+  "cpu_count":  4,
+  "cpu_count_logical":  8,
+  "gpu":  "NVIDIA GeForce MX130",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "461903499264",
+      "used":  "165601042432"
+    }
+  },
+  "memory":  {
+    "total":  "8157999104"
+  },
+  "cpu":  {
+    "count":  4,
+    "countLogical":  8
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA GeForce MX130",
+      "memoryTotal":  "2147483648",
+      "cudaCores":  384,
+      "architecture":  "Maxwell"
+    }
+  ],
+  "cudaVersion":  "12.6"
+}

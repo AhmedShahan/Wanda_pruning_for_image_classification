@@ -1,0 +1,26 @@
+2024-11-02 22:15:26,842 INFO    MainThread:49134 [wandb_setup.py:_flush():79] Current SDK version is 0.18.5
+2024-11-02 22:15:26,845 INFO    MainThread:49134 [wandb_setup.py:_flush():79] Configure stats pid to 49134
+2024-11-02 22:15:26,846 INFO    MainThread:49134 [wandb_setup.py:_flush():79] Loading settings from /home/shahanahmed/.config/wandb/settings
+2024-11-02 22:15:26,846 INFO    MainThread:49134 [wandb_setup.py:_flush():79] Loading settings from /media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/settings
+2024-11-02 22:15:26,846 INFO    MainThread:49134 [wandb_setup.py:_flush():79] Loading settings from environment variables: {}
+2024-11-02 22:15:26,846 INFO    MainThread:49134 [wandb_setup.py:_flush():79] Applying setup settings: {'mode': None, '_disable_service': None}
+2024-11-02 22:15:26,847 INFO    MainThread:49134 [wandb_setup.py:_flush():79] Inferring run settings from compute environment: {'program_relpath': 'main.py', 'program_abspath': '/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py', 'program': '/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/main.py'}
+2024-11-02 22:15:26,847 INFO    MainThread:49134 [wandb_setup.py:_flush():79] Applying login settings: {}
+2024-11-02 22:15:26,847 INFO    MainThread:49134 [wandb_init.py:_log_setup():534] Logging user logs to /media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241102_221526-32bevfin/logs/debug.log
+2024-11-02 22:15:26,848 INFO    MainThread:49134 [wandb_init.py:_log_setup():535] Logging internal logs to /media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241102_221526-32bevfin/logs/debug-internal.log
+2024-11-02 22:15:26,849 INFO    MainThread:49134 [wandb_init.py:init():621] calling init triggers
+2024-11-02 22:15:26,849 INFO    MainThread:49134 [wandb_init.py:init():628] wandb.init called with sweep_config: {}
+config: {'batch_size': 256, 'epochs': 1, 'update_freq': 1, 'model': 'convnext_tiny', 'input_size': 32, 'layer_scale_init_value': 1e-06, 'dropout': 0, 'drop_path': 0, 'drop_mode': 'standard', 'drop_schedule': 'constant', 'cutoff_epoch': 0, 'model_ema': False, 'model_ema_decay': 0.9999, 'model_ema_force_cpu': False, 'model_ema_eval': False, 'opt': 'adamw', 'opt_eps': 1e-08, 'opt_betas': None, 'clip_grad': None, 'momentum': 0.9, 'weight_decay': 0.05, 'weight_decay_end': None, 'lr': 0.004, 'layer_decay': 1.0, 'min_lr': 1e-06, 'warmup_epochs': 50, 'warmup_steps': -1, 'color_jitter': 0.4, 'aa': 'rand-m9-mstd0.5-inc1', 'smoothing': 0.1, 'train_interpolation': 'bicubic', 'crop_pct': None, 'reprob': 0.25, 'remode': 'pixel', 'recount': 1, 'resplit': False, 'mixup': 0.8, 'cutmix': 1.0, 'cutmix_minmax': None, 'mixup_prob': 1.0, 'mixup_switch_prob': 0.5, 'mixup_mode': 'batch', 'finetune': '', 'head_init_scale': 1.0, 'model_key': 'model|module', 'model_prefix': '', 'data_path': '/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/DATASET/cifat100', 'eval_data_path': None, 'nb_classes': 100, 'imagenet_default_mean_and_std': True, 'data_set': 'CIFAR', 'output_dir': '', 'log_dir': None, 'device': 'cuda', 'seed': 0, 'auto_resume': True, 'save_ckpt': True, 'save_ckpt_freq': 1, 'save_ckpt_num': 3, 'start_epoch': 0, 'eval': False, 'dist_eval': True, 'disable_eval': False, 'num_workers': 10, 'pin_mem': True, 'world_size': 1, 'local_rank': -1, 'dist_on_itp': False, 'dist_url': 'env://', 'use_amp': False, 'enable_wandb': False, 'project': 'convnext', 'wandb_ckpt': False, 'nsamples': 4096, 'sparsity': 0.0, 'prune_metric': None, 'prune_granularity': None, 'blocksize': 1, 'distributed': False}
+2024-11-02 22:15:26,851 INFO    MainThread:49134 [wandb_init.py:init():671] starting backend
+2024-11-02 22:15:26,851 INFO    MainThread:49134 [wandb_init.py:init():675] sending inform_init request
+2024-11-02 22:15:26,858 INFO    MainThread:49134 [backend.py:_multiprocessing_setup():104] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-11-02 22:15:26,862 INFO    MainThread:49134 [wandb_init.py:init():688] backend started and connected
+2024-11-02 22:15:26,881 INFO    MainThread:49134 [wandb_init.py:init():783] updated telemetry
+2024-11-02 22:15:26,902 INFO    MainThread:49134 [wandb_init.py:init():816] communicating run to backend with 90.0 second timeout
+2024-11-02 22:15:27,621 INFO    MainThread:49134 [wandb_init.py:init():867] starting run threads in backend
+2024-11-02 22:15:29,346 INFO    MainThread:49134 [wandb_run.py:_console_start():2463] atexit reg
+2024-11-02 22:15:29,347 INFO    MainThread:49134 [wandb_run.py:_redirect():2311] redirect: wrap_raw
+2024-11-02 22:15:29,348 INFO    MainThread:49134 [wandb_run.py:_redirect():2376] Wrapping output streams.
+2024-11-02 22:15:29,348 INFO    MainThread:49134 [wandb_run.py:_redirect():2401] Redirects installed.
+2024-11-02 22:15:29,359 INFO    MainThread:49134 [wandb_init.py:init():911] run started, returning control to user process
+2024-11-02 22:15:36,350 WARNING MsgRouterThr:49134 [router.py:message_loop():77] message_loop has been closed

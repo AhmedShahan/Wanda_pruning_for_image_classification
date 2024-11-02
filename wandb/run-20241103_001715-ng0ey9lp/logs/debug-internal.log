@@ -1,0 +1,8 @@
+{"time":"2024-11-03T00:17:15.051435951+06:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-11-03T00:17:15.051506748+06:00","level":"INFO","msg":"created symlink","path":"/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241103_001715-ng0ey9lp/logs/debug-core.log"}
+{"time":"2024-11-03T00:17:15.283150591+06:00","level":"INFO","msg":"created new stream","id":"ng0ey9lp"}
+{"time":"2024-11-03T00:17:15.283345183+06:00","level":"INFO","msg":"stream: started","id":"ng0ey9lp"}
+{"time":"2024-11-03T00:17:15.283805175+06:00","level":"INFO","msg":"sender: started","stream_id":"ng0ey9lp"}
+{"time":"2024-11-03T00:17:15.283578878+06:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"ng0ey9lp"}}
+{"time":"2024-11-03T00:17:15.283696665+06:00","level":"INFO","msg":"handler: started","stream_id":{"value":"ng0ey9lp"}}
+{"time":"2024-11-03T00:17:16.071127594+06:00","level":"INFO","msg":"Starting system monitor"}

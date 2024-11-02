@@ -24,18 +24,48 @@ def check_sparsity(model):
         fc_params += W.numel()
     return float(zero_cnt) / fc_params
 
-def compute_mask(W_metric, prune_granularity, sparsity):
-    if prune_granularity == "layer":
-        thres = torch.sort(W_metric.flatten().cuda())[0][int(W_metric.numel() * sparsity)].cpu()
-        W_mask = (W_metric <= thres)
-        return W_mask 
-    elif prune_granularity == "row":
-        W_mask = (torch.zeros_like(W_metric)==1)
-        sort_res = torch.sort(W_metric, dim=-1, stable=True)
+def compute_mask(metric, granularity):
+    """
+    Compute pruning mask based on the metric to achieve 50% sparsity
+    Args:
+        metric: The metric to use for pruning (weight magnitude or WANDA score)
+        granularity: 'per_layer' or 'per_channel'
+    Returns:
+        torch.Tensor: Boolean mask where True indicates weights to be pruned
+    """
+    # Ensure metric is a tensor
+    if not isinstance(metric, torch.Tensor):
+        metric = torch.tensor(metric)
+    
+    # Initialize mask
+    mask = torch.zeros_like(metric, dtype=torch.bool, device=metric.device)
+    
+    if granularity == "per_layer":
+        # Flatten the metric for layer-wise pruning
+        metric_flat = metric.flatten()
+        # Calculate threshold for 50% pruning
+        k = len(metric_flat) // 2  # This ensures 50% sparsity
+        if k < 1:
+            return torch.ones_like(metric, dtype=torch.bool)
+        threshold = torch.kthvalue(metric_flat, k).values
+        # Create mask
+        mask = (metric <= threshold).to(metric.device)
+        
+    elif granularity == "per_channel":
+        # Apply 50% pruning per output channel
+        for i in range(metric.shape[0]):
+            channel_metric = metric[i].flatten()
+            k = len(channel_metric) // 2  # 50% sparsity per channel
+            if k < 1:
+                mask[i] = torch.ones_like(metric[i], dtype=torch.bool)
+                continue
+            threshold = torch.kthvalue(channel_metric, k).values
+            mask[i] = metric[i] <= threshold
+    else:
+        raise ValueError(f"Unsupported granularity: {granularity}. Choose 'per_layer' or 'per_channel'")
+            
+    return mask
 
-        indices = sort_res[1][:,:int(W_metric.shape[1]*sparsity)]
-        W_mask.scatter_(1, indices, True)
-        return W_mask 
 
 def prune_deit(args, model, calib_data, device):
     inps = calib_data 
@@ -161,96 +191,111 @@ def prune_vit(args, model, calib_data, device):
             subset[name].weight.data[W_mask] = 0
         ##############################################
 import torch
-
 def prune_convnext(args, model, calib_data, device):
-    inps = calib_data 
+    """
+    Prune ConvNeXt model with 50% sparsity per layer of remaining non-zero weights
+    """
+    inps = calib_data
     bs = inps.shape[0]
-    require_forward = (args.prune_metric in ["wanda"])
-
-    ##############################################################
-    metric_stats = []
+    
+    total_params = 0
+    pruned_params = 0
+    
     for block_id in range(4):
+        print(f"Processing block {block_id}")
         subset = find_layers(model.stages[block_id])
-        res_per_layer = {}
+        
+        # Forward pass for WANDA metric calculation
+        layer = model.downsample_layers[block_id]
+        if bs > 1024:
+            tmp_res = []
+            for i1 in range(0, bs, 512):
+                j1 = min(i1+512, bs)
+                tmp_res.append(layer(inps[i1:j1]))
+            inps = torch.cat(tmp_res, dim=0)
+        else:
+            inps = layer(inps)
+
+        # Wrap layers and collect statistics
+        wrapped_layers = {}
         for name in subset:
-            res_per_layer[name] = torch.abs(subset[name].weight.data)
-        metric_stats.append(res_per_layer)
-    ##############################################################
+            wrapped_layers[name] = WrappedLayer(subset[name])
+            
+        handles = []
+        for name in wrapped_layers:
+            handles.append(subset[name].register_forward_hook(
+                lambda n, i, o, name=name: wrapped_layers[name].add_batch(i[0].data, o.data)
+            ))
+            
+        # Forward pass through the block
+        layer = model.stages[block_id]
+        if bs > 1024:
+            tmp_res = []
+            for i1 in range(0, bs, 512):
+                j1 = min(i1+512, bs)
+                tmp_res.append(layer(inps[i1:j1]))
+            inps = torch.cat(tmp_res, dim=0)
+        else:
+            inps = layer(inps)
+            
+        for h in handles:
+            h.remove()
 
-    thresh = None 
-    for block_id in range(4):
-        # print(f"Block {block_id}")
-        subset = find_layers(model.stages[block_id])
-
-        if require_forward:
-            layer = model.downsample_layers[block_id]
-            if bs > 1024:
-                tmp_res = []
-                for i1 in range(0, bs, 512):
-                    j1 = min(i1 + 512, bs)
-                    tmp_res.append(layer(inps[i1:j1]))
-                inps = torch.cat(tmp_res, dim=0)
-            else:
-                inps = layer(inps)
-
-            wrapped_layers = {}
-            for name in subset:
-                wrapped_layers[name] = WrappedLayer(subset[name])
-
-            def add_batch(name):
-                def tmp(_, inp, out):
-                    wrapped_layers[name].add_batch(inp[0].data, out.data)
-                return tmp
-
-            handles = []
-            for name in wrapped_layers:
-                handles.append(subset[name].register_forward_hook(add_batch(name)))
-            layer = model.stages[block_id]
-            if bs > 1024:
-                tmp_res = []
-                for i1 in range(0, bs, 512):
-                    j1 = min(i1 + 512, bs)
-                    tmp_res.append(layer(inps[i1:j1]))
-                inps = torch.cat(tmp_res, dim=0)
-            else:
-                inps = layer(inps)
-            for h in handles:
-                h.remove()
-
-        ################# Pruning ###################
+        # Modified pruning section
         for name in subset:
+            weight = subset[name].weight.data
+            total_params += weight.numel()
+            
+            # Get current non-zero weights
+            current_nonzero = weight != 0
+            nonzero_count = current_nonzero.sum().item()
+            
+            # Calculate target number of weights to keep (50% of current non-zero)
+            target_nonzero = nonzero_count // 2
+            
+            # Calculate WANDA metric only for non-zero weights
+            metric = torch.abs(weight) * current_nonzero.float()
             if args.prune_metric == "wanda":
-                metric_stats[block_id][name] *= torch.sqrt(wrapped_layers[name].scaler_row.reshape((1, -1)))
-
-            # Debugging: Check the metric before computing the mask
-            # print(f"Layer: {name}, Metric before mask: {metric_stats[block_id][name]}")
-
-            W_mask = compute_mask(metric_stats[block_id][name], args.prune_granularity, args.sparsity)
-
-            if W_mask is None:
-                # print(f"Warning: W_mask is None for {name}. Skipping pruning for this layer.")
-                continue  # Skip this layer or handle it accordingly
-
-            # Debugging: Check the mask and weights
-            # print(f"W_mask for {name}: {W_mask}, Shape: {W_mask.shape}")
-            # print(f"Weight shape for {name}: {subset[name].weight.data.shape}")
-
-            subset[name].weight.data[W_mask] = 0
-
-            # Debugging: Check the number of non-zero weights after pruning
-            # print(f"Non-zero weights for {name} after pruning: {torch.count_nonzero(subset[name].weight.data)}")
-        ##############################################
-
-def compute_mask(metric, granularity, sparsity):
-    # Add your mask computation logic here
-    # For demonstration purposes, we'll assume this function returns a valid mask or None
-    # Ensure to check for sparsity and granularity in your implementation.
-    if metric is None or metric.numel() == 0:
-        return None  # Return None for invalid metrics
-    # Example mask computation logic (this should be tailored to your use case)
-    threshold = torch.quantile(metric, sparsity)
-    W_mask = metric < threshold
-    return W_mask
+                scaler = wrapped_layers[name].scaler_row
+                if scaler is not None:
+                    metric *= torch.sqrt(scaler.reshape((1, -1)))
+            
+            # Find threshold for keeping top 50% of non-zero weights
+            if nonzero_count > 0:
+                # Get values only from non-zero positions
+                nonzero_metrics = metric[current_nonzero]
+                if len(nonzero_metrics) > 0:
+                    threshold = torch.sort(nonzero_metrics)[0][target_nonzero]
+                    mask = metric <= threshold
+                    
+                    # Only apply mask to non-zero weights
+                    mask = mask & current_nonzero
+                    
+                    # Apply pruning
+                    subset[name].weight.data[mask] = 0
+                    
+                    # Track pruned parameters
+                    pruned_params += mask.sum().item()
+                    
+                    # Calculate and print layer sparsity
+                    layer_sparsity = (weight == 0).sum().item() / weight.numel()
+                    print(f"Layer {name} sparsity: {layer_sparsity:.4f}")
+                    print(f"Layer {name} non-zero weights remaining: {(weight != 0).sum().item()}")
+    
+    overall_sparsity = pruned_params / total_params if total_params > 0 else 0
+    print(f"Overall model sparsity: {overall_sparsity:.4f}")
+    
+    return model
+# def compute_mask(metric, granularity, sparsity):
+#     # Add your mask computation logic here
+#     # For demonstration purposes, we'll assume this function returns a valid mask or None
+#     # Ensure to check for sparsity and granularity in your implementation.
+#     if metric is None or metric.numel() == 0:
+#         return None  # Return None for invalid metrics
+#     # Example mask computation logic (this should be tailored to your use case)
+#     threshold = torch.quantile(metric, sparsity)
+#     W_mask = metric < threshold
+#     return W_mask
 
 def check_sparsity(model):
     total_params = 0
