@@ -122,7 +122,7 @@ def prune_vit(args, model, calib_data, device):
     inps = model.pos_drop(inps)
 
     for block_id, blk in enumerate(model.blocks):
-        print(f"block {block_id}")
+        # print(f"block {block_id}")
         subset = find_layers(blk)
 
         if require_forward:
@@ -179,7 +179,7 @@ def prune_convnext(args, model, calib_data, device):
 
     thresh = None 
     for block_id in range(4):
-        print(f"Block {block_id}")
+        # print(f"Block {block_id}")
         subset = find_layers(model.stages[block_id])
 
         if require_forward:
@@ -223,22 +223,22 @@ def prune_convnext(args, model, calib_data, device):
                 metric_stats[block_id][name] *= torch.sqrt(wrapped_layers[name].scaler_row.reshape((1, -1)))
 
             # Debugging: Check the metric before computing the mask
-            print(f"Layer: {name}, Metric before mask: {metric_stats[block_id][name]}")
+            # print(f"Layer: {name}, Metric before mask: {metric_stats[block_id][name]}")
 
             W_mask = compute_mask(metric_stats[block_id][name], args.prune_granularity, args.sparsity)
 
             if W_mask is None:
-                print(f"Warning: W_mask is None for {name}. Skipping pruning for this layer.")
+                # print(f"Warning: W_mask is None for {name}. Skipping pruning for this layer.")
                 continue  # Skip this layer or handle it accordingly
 
             # Debugging: Check the mask and weights
-            print(f"W_mask for {name}: {W_mask}, Shape: {W_mask.shape}")
-            print(f"Weight shape for {name}: {subset[name].weight.data.shape}")
+            # print(f"W_mask for {name}: {W_mask}, Shape: {W_mask.shape}")
+            # print(f"Weight shape for {name}: {subset[name].weight.data.shape}")
 
             subset[name].weight.data[W_mask] = 0
 
             # Debugging: Check the number of non-zero weights after pruning
-            print(f"Non-zero weights for {name} after pruning: {torch.count_nonzero(subset[name].weight.data)}")
+            # print(f"Non-zero weights for {name} after pruning: {torch.count_nonzero(subset[name].weight.data)}")
         ##############################################
 
 def compute_mask(metric, granularity, sparsity):

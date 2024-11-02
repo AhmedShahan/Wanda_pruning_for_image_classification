@@ -256,8 +256,8 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
             decay=args.model_ema_decay,
             device='cpu' if args.model_ema_force_cpu else '',
             resume='')
-        print("Using EMA with decay = %.8f" % args.model_ema_decay)
-    print("###############\nTrain with prune\n")
+        # print("Using EMA with decay = %.8f" % args.model_ema_decay)
+    # print("###############\nTrain with prune\n")
     
     mixup_fn = None
     # mixup_active = args.mixup > 0 or args.cutmix > 0. or args.cutmix_minmax is not None
@@ -301,7 +301,7 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
     )
 
     wd_schedule_values = utils.cosine_scheduler(args.weight_decay, args.weight_decay_end, args.epochs, num_training_steps_per_epoch)
-    print("Max WD = %.7f, Min WD = %.7f" % (max(wd_schedule_values), min(wd_schedule_values)))
+    # print("Max WD = %.7f, Min WD = %.7f" % (max(wd_schedule_values), min(wd_schedule_values)))
 
 
     schedules = {}
@@ -315,13 +315,13 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
         schedules['do'] = drop_scheduler(
             args.dropout, args.epochs, num_training_steps_per_epoch,
             args.cutoff_epoch, args.drop_mode, args.drop_schedule)
-        print("Min DO = %.7f, Max DO = %.7f" % (min(schedules['do']), max(schedules['do'])))
+        # print("Min DO = %.7f, Max DO = %.7f" % (min(schedules['do']), max(schedules['do'])))
 
     if args.drop_path > 0:
         schedules['dp'] = drop_scheduler(
             args.drop_path, args.epochs, num_training_steps_per_epoch,
             args.cutoff_epoch, args.drop_mode, args.drop_schedule)
-        print("Min DP = %.7f, Max DP = %.7f" % (min(schedules['dp']), max(schedules['dp'])))
+        # print("Min DP = %.7f, Max DP = %.7f" % (min(schedules['dp']), max(schedules['dp'])))
 
 
     # Setup optimizer and criterion
@@ -332,7 +332,10 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
     # current_sparsity = args.sparsity
     # print("Current Sparcity", current_sparsity)
     actual_sparsity = check_sparsity(model)
+    pruneRound=0
     while actual_sparsity > 0:
+        pruneRound+=1
+        print(f"**************Prune Round {pruneRound}**********************")
         print(f"\nCurrent sparsity level: {actual_sparsity}")
         
         # Pruning step
@@ -350,7 +353,7 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
 
         # Training loop for the current sparsity level
         for epoch in range(args.epochs):
-            # Train for one epoch
+            ###Train for one epoch
             train_stats = train_one_epoch(
                 model, criterion, train_loader, optimizer,
                 device, epoch, loss_scaler, args.clip_grad, model_ema, mixup_fn,
@@ -395,8 +398,7 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
             test_accuracy = test_correct / test_total * 100
             test_error = 100 - test_accuracy
 
-            print(f"Epoch {epoch}: Training Error = {train_error:.2f}%, Testing Error = {test_error:.2f}%")
-
+            # print(f"Epoch {epoch}: Training Error = {train_error:.2f}%, Testing Error = {test_error:.2f}%")
 
         actual_sparsity = check_sparsity(model)
 
@@ -443,9 +445,9 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
 
 
 def main(args):
-    print("Main function called")
+    # print("Main function called")
     utils.init_distributed_mode(args)
-    print(args)
+    # print(args)
     device = torch.device(args.device)
 
     # fix the seed for reproducibility
@@ -468,12 +470,12 @@ def main(args):
         dataset_train, num_replicas=num_tasks, rank=global_rank, shuffle=True, seed=args.seed,
     )
     
-    print("Sampler_train = %s" % str(sampler_train))
+    # print("Sampler_train = %s" % str(sampler_train))
     if args.dist_eval:
-        if len(dataset_val) % num_tasks != 0:
-            print('Warning: Enabling distributed evaluation with an eval dataset not divisible by process number. '
-                    'This will slightly alter validation results as extra duplicate entries are added to achieve '
-                    'equal num of samples per-process.')
+        # if len(dataset_val) % num_tasks != 0:
+            # # print('Warning: Enabling distributed evaluation with an eval dataset not divisible by process number. '
+            #         'This will slightly alter validation results as extra duplicate entries are added to achieve '
+            #         'equal num of samples per-process.')
         sampler_val = torch.utils.data.DistributedSampler(
             dataset_val, num_replicas=num_tasks, rank=global_rank, shuffle=False)
     else:
@@ -511,7 +513,7 @@ def main(args):
         model_without_ddp = model.module
 
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print('number of params:', n_parameters)
+    # print('number of params:', n_parameters)
 
     total_batch_size = args.batch_size * args.update_freq * utils.get_world_size()
     num_training_steps_per_epoch = len(dataset_train) // total_batch_size

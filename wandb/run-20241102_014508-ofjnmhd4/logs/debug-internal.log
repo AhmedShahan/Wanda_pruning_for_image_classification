@@ -1,0 +1,8 @@
+{"time":"2024-11-02T01:45:08.650027173+06:00","level":"INFO","msg":"using version","core version":"0.18.5"}
+{"time":"2024-11-02T01:45:08.650099152+06:00","level":"INFO","msg":"created symlink","path":"/media/shahanahmed/b8c6fb5d-b937-4730-bb0f-ac0eba675d7e/Wanda_pruning_for_image_classification/wandb/run-20241102_014508-ofjnmhd4/logs/debug-core.log"}
+{"time":"2024-11-02T01:45:08.76406472+06:00","level":"INFO","msg":"created new stream","id":"ofjnmhd4"}
+{"time":"2024-11-02T01:45:08.764270224+06:00","level":"INFO","msg":"stream: started","id":"ofjnmhd4"}
+{"time":"2024-11-02T01:45:08.76448977+06:00","level":"INFO","msg":"sender: started","stream_id":"ofjnmhd4"}
+{"time":"2024-11-02T01:45:08.764427576+06:00","level":"INFO","msg":"handler: started","stream_id":{"value":"ofjnmhd4"}}
+{"time":"2024-11-02T01:45:08.764368199+06:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"ofjnmhd4"}}
+{"time":"2024-11-02T01:45:10.262270134+06:00","level":"INFO","msg":"Starting system monitor"}
