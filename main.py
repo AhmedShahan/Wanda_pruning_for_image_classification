@@ -34,7 +34,7 @@ import models.swin_transformer
 import models.mlp_mixer
 import models.deit 
 from drop_scheduler import drop_scheduler
-from prune_utils import prune_convnext, prune_deit, prune_vit, check_sparsity 
+from prune_utils import prune_convnext, prune_deit, prune_vit, check_sparsity, get_layer_sparsity
 
 def str2bool(v):
     """
@@ -339,18 +339,24 @@ def train_with_pruning(model, dataset_train, dataset_val, device, args):
         print(f"**************Prune Round {pruneRound}**********************")
         print(f"\nCurrent sparsity level: {overall_sparcity}")
         # Count initial non-zero weights
-        initial_nonzero = sum([torch.sum(p != 0).item() for p in model.parameters()])
-        print(f"Non-zero weights before pruning: {initial_nonzero}")
+        # Get pre-pruning stats
+        _, pre_nonzero, _ = get_layer_sparsity(model)
+        print(f"Non-zero weights before pruning: {pre_nonzero}")
         
         # Pruning step
         np.random.seed(0)
         calibration_ids = np.random.choice(len(dataset_train), args.nsamples)
         calib_data = [dataset_train[i][0].unsqueeze(dim=0) for i in calibration_ids]
         calib_data = torch.cat(calib_data, dim=0).to(device)
-
         with torch.no_grad():
             if "convnext" in args.model:
                 model = prune_convnext(args, model, calib_data, device)
+        
+        # Verify pruning effectiveness
+        _, post_nonzero, _ = get_layer_sparsity(model)
+        if post_nonzero >= pre_nonzero:
+            print("Error: Pruning failed to reduce weights!")
+            break
         
         # Check sparsity after pruning
         post_prune_sparcity = check_sparsity(model)

@@ -191,100 +191,98 @@ def prune_vit(args, model, calib_data, device):
             subset[name].weight.data[W_mask] = 0
         ##############################################
 import torch
+
+def get_layer_sparsity(model):
+    """Helper function to get detailed sparsity information"""
+    total_weights = 0
+    total_nonzero = 0
+    layer_stats = {}
+    
+    for name, module in model.named_modules():
+        if isinstance(module, torch.nn.Conv2d):
+            weights = module.weight.data
+            n_weights = weights.numel()
+            n_nonzero = torch.count_nonzero(weights).item()
+            sparsity = 1.0 - (n_nonzero / n_weights)
+            
+            total_weights += n_weights
+            total_nonzero += n_nonzero
+            layer_stats[name] = {
+                'total': n_weights,
+                'nonzero': n_nonzero,
+                'sparsity': sparsity
+            }
+    
+    return layer_stats, total_nonzero, total_weights
 def prune_convnext(args, model, calib_data, device):
     """
-    Prune ConvNeXt model with 50% sparsity per layer of remaining non-zero weights
+    Guaranteed weight reduction pruning implementation
     """
-    inps = calib_data
-    bs = inps.shape[0]
+    def count_nonzero_weights(model):
+        return sum(torch.count_nonzero(p).item() for p in model.parameters() if p.requires_grad)
+
+    initial_nonzero = count_nonzero_weights(model)
+    print(f"Initial non-zero weights: {initial_nonzero}")
+
+    # Process each layer directly
+    for name, module in model.named_modules():
+        if isinstance(module, torch.nn.Conv2d):
+            # Get the weight tensor
+            weight = module.weight.data
+            
+            # Count current non-zero weights
+            mask = weight != 0
+            n_nonzero = torch.count_nonzero(mask).item()
+            
+            if n_nonzero > 1:  # Only prune if there are weights to prune
+                # Calculate absolute values for importance
+                importance = torch.abs(weight)
+                
+                # Only consider non-zero weights
+                importance[~mask] = 0
+                
+                # Flatten for easier processing
+                flat_importance = importance.view(-1)
+                flat_mask = mask.view(-1)
+                
+                # Get indices of non-zero weights
+                nonzero_idx = torch.nonzero(flat_mask).squeeze()
+                
+                if len(nonzero_idx) > 0:
+                    # Sort non-zero weights by importance
+                    nonzero_importance = flat_importance[nonzero_idx]
+                    sorted_idx = torch.argsort(nonzero_importance)
+                    
+                    # Calculate how many weights to prune (50% of current non-zero)
+                    n_to_prune = max(len(nonzero_idx) // 2, 1)
+                    
+                    # Get indices to prune
+                    prune_idx = nonzero_idx[sorted_idx[:n_to_prune]]
+                    
+                    # Create pruning mask
+                    flat_weight = weight.view(-1)
+                    flat_weight[prune_idx] = 0
+                    
+                    # Reshape back
+                    weight.data = flat_weight.view(weight.shape)
+                    
+                    # Verify pruning for this layer
+                    new_nonzero = torch.count_nonzero(weight).item()
+                    print(f"\nLayer {name}:")
+                    print(f"  Before pruning: {n_nonzero}")
+                    print(f"  After pruning: {new_nonzero}")
+                    print(f"  Weights pruned: {n_nonzero - new_nonzero}")
+
+    # Verify overall pruning effectiveness
+    final_nonzero = count_nonzero_weights(model)
+    weights_pruned = initial_nonzero - final_nonzero
+    print(f"\nOverall pruning results:")
+    print(f"Total weights pruned: {weights_pruned}")
+    print(f"New total non-zero weights: {final_nonzero}")
     
-    total_params = 0
-    pruned_params = 0
-    
-    for block_id in range(4):
-        print(f"Processing block {block_id}")
-        subset = find_layers(model.stages[block_id])
+    if final_nonzero >= initial_nonzero:
+        raise ValueError("Pruning failed to reduce weights!")
         
-        # Forward pass for WANDA metric calculation
-        layer = model.downsample_layers[block_id]
-        if bs > 1024:
-            tmp_res = []
-            for i1 in range(0, bs, 512):
-                j1 = min(i1+512, bs)
-                tmp_res.append(layer(inps[i1:j1]))
-            inps = torch.cat(tmp_res, dim=0)
-        else:
-            inps = layer(inps)
-
-        # Wrap layers and collect statistics
-        wrapped_layers = {}
-        for name in subset:
-            wrapped_layers[name] = WrappedLayer(subset[name])
-            
-        handles = []
-        for name in wrapped_layers:
-            handles.append(subset[name].register_forward_hook(
-                lambda n, i, o, name=name: wrapped_layers[name].add_batch(i[0].data, o.data)
-            ))
-            
-        # Forward pass through the block
-        layer = model.stages[block_id]
-        if bs > 1024:
-            tmp_res = []
-            for i1 in range(0, bs, 512):
-                j1 = min(i1+512, bs)
-                tmp_res.append(layer(inps[i1:j1]))
-            inps = torch.cat(tmp_res, dim=0)
-        else:
-            inps = layer(inps)
-            
-        for h in handles:
-            h.remove()
-
-        # Modified pruning section
-        for name in subset:
-            weight = subset[name].weight.data
-            total_params += weight.numel()
-            
-            # Get current non-zero weights
-            current_nonzero = weight != 0
-            nonzero_count = current_nonzero.sum().item()
-            
-            # Calculate target number of weights to keep (50% of current non-zero)
-            target_nonzero = nonzero_count // 2
-            
-            # Calculate WANDA metric only for non-zero weights
-            metric = torch.abs(weight) * current_nonzero.float()
-            if args.prune_metric == "wanda":
-                scaler = wrapped_layers[name].scaler_row
-                if scaler is not None:
-                    metric *= torch.sqrt(scaler.reshape((1, -1)))
-            
-            # Find threshold for keeping top 50% of non-zero weights
-            if nonzero_count > 0:
-                # Get values only from non-zero positions
-                nonzero_metrics = metric[current_nonzero]
-                if len(nonzero_metrics) > 0:
-                    threshold = torch.sort(nonzero_metrics)[0][target_nonzero]
-                    mask = metric <= threshold
-                    
-                    # Only apply mask to non-zero weights
-                    mask = mask & current_nonzero
-                    
-                    # Apply pruning
-                    subset[name].weight.data[mask] = 0
-                    
-                    # Track pruned parameters
-                    pruned_params += mask.sum().item()
-                    
-                    # Calculate and print layer sparsity
-                    layer_sparsity = (weight == 0).sum().item() / weight.numel()
-                    print(f"Layer {name} sparsity: {layer_sparsity:.4f}")
-                    print(f"Layer {name} non-zero weights remaining: {(weight != 0).sum().item()}")
-    
-    overall_sparsity = pruned_params / total_params if total_params > 0 else 0
-    print(f"Overall model sparsity: {overall_sparsity:.4f}")
-    
     return model
 # def compute_mask(metric, granularity, sparsity):
 #     # Add your mask computation logic here

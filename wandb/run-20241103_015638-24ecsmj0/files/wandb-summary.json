@@ -1,0 +1,1 @@
+{"_step":710,"Rank-0 Batch Wise/train_loss":4.356755256652832,"_wandb":{"runtime":2063},"Rank-0 Batch Wise/train_min_lr":5.1287311519130165e-05,"Rank-0 Batch Wise/train_max_lr":5.1287311519130165e-05,"_timestamp":1.7305794605000143e+09,"Rank-0 Batch Wise/global_train_step":125,"_runtime":2061.533730164,"Rank-0 Batch Wise/train_class_acc":0.0390625}
